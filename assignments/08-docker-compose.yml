@@ -1,6 +1,6 @@
 services:
   ratings:
-    build: ./ratings/
+    build: ~/ratings
     image: ghcr.io/silversky9/bookinfo-ratings:dev
     ports:
       - "8080:8080"
@@ -11,29 +11,37 @@ services:
       MONGO_DB_PASSWORD: CHANGEME
   mongodb:
     image:  bitnami/mongodb:5.0.2-debian-10-r2
-    # ports:
-    #   - "27017:27017"
+    ports:
+      - "27017:27017"
     volumes:
-      - ./databases:/docker-entrypoint-initdb.d
+      - ~/ratings/databases:/docker-entrypoint-initdb.d
     environment:
       MONGODB_ROOT_PASSWORD : CHANGEME
       MONGODB_USERNAME : ratings
       MONGODB_PASSWORD : CHANGEME
       MONGODB_DATABASE : ratings
   reviews:
-    build: ./reviews/
+    build: ~/reviews
     image: ghcr.io/silversky9/reviews-services:dev
     ports:
       - "8082:9080"
+    environment:
+      ENABLE_RATINGS : "true"
+      RATINGS_SERVICE: http://ratings:8080
   details:
-    build: ./details
+    build: ~/details
     image: ghcr.io/silversky9/details-services:dev
     ports:
       - "8081:9080"
   productpage:
-    build: ./productpage
+    build: ~/productpage
     image: ghcr.io/silversky9/productpage:dev
     ports:
       - "8083:9080"
+    environment:
+      DETAILS_HOSTNAME: http://details:9080
+      REVIEWS_HOSTNAME: http://reviews:9080
+      RATINGS_HOSTNAME: http://ratings:8080
+      
 
   
